@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>ToDo App</title>
+    <link rel="icon" href="./img/catdog.ico" type="image/x-icon">
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- Plugin CSS -->
+    <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="css/freelancer.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body id="page-top">
+    <div id="app">
+      <script>
+      // This is called with the results from from FB.getLoginStatus().
+      function statusChangeCallback(response) {
+        console.log('statusChangeCallback');
+        console.log(response);
+        // The response object is returned with a status field that lets the
+        // app know the current login status of the person.
+        // Full docs on the response object can be found in the documentation
+        // for FB.getLoginStatus().
+        if (response.status === 'connected') {
+          // Logged into your app and Facebook.
+          // console.log('connecteueu',response.authResponse.accessToken);
+          axios.post('http://todoserver.lockonmaram.com/fblogin',{
+            token: response.authResponse.accessToken
+          })
+          .then(res=>{
+            console.log('res---->',res.data);
+            localStorage.setItem('authorization', res.data.token);
+            localStorage.setItem('id', res.data.userId);
+            localStorage.setItem('first_name', res.data.first_name);
+            localStorage.setItem('last_name', res.data.last_name);
+            window.location.assign('http://todo.lockonmaram.com')
+          })
+          .catch(err=>{
+            console.log(err);
+          })
+          // testAPI();
+        }
+      }
+
+      // This function is called when someone finishes with the Login
+      // Button.  See the onlogin handler attached to it in the sample
+      // code below.
+      function checkLoginState() {
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      }
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '1767743639969411',
+          cookie     : true,  // enable cookies to allow the server to access
+          // the session
+          xfbml      : true,  // parse social plugins on this page
+          version    : 'v2.8' // use graph api version 2.8
+        });
+
+        // Now that we've initialized the JavaScript SDK, we call
+        // FB.getLoginStatus().  This function gets the state of the
+        // person visiting this page and can return one of three states to
+        // the callback you provide.  They can be:
+        //
+        // 1. Logged into your app ('connected')
+        // 2. Logged into Facebook, but not your app ('not_authorized')
+        // 3. Not logged into Facebook and can't tell if they are logged into
+        //    your app or not.
+        //
+        // These three cases are handled in the callback function.
+
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+
+      };
+
+      // Load the SDK asynchronously
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+      // Here we run a very simple test of the Graph API after login is
+      // successful.  See statusChangeCallback() for when this call is made.
+      function testAPI() {
+        console.log('Welcome!  Fetching your information.... ');
+        FB.api('/me', function(response) {
+          // console.log(response);
+          // console.log('Successful login for: ' + response.name);
+          // document.getElementById('status').innerHTML =
+          // 'Thanks for logging in, ' + response.name + '!';
+        });
+      }
+    </script>
+      <!-- Navigation -->
+      <nav class="navbar navbar-expand-lg bg-secondary fixed-top text-uppercase" id="mainNav">
+        <div class="container">
+          <a class="navbar-brand js-scroll-trigger" href="#page-top">ToDo App</a>
+          <button class="navbar-toggler navbar-toggler-right text-uppercase bg-primary text-white rounded" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fa fa-bars"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item mx-0 mx-lg-1" v-if="token !== null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="#tasks">Tasks</a>
+              </li>
+              <li class="nav-item mx-0 mx-lg-1" v-if="token !== null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="#add-task">Add Task</a>
+              </li>
+              <li class="nav-item mx-0 mx-lg-1" v-if="token !== null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="#">{{ first_name }}{{ last_name }}</a>
+              </li>
+              <li class="nav-item mx-0 mx-lg-1" v-if="token !== null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" v-on:click="logout" href="#">Logout</a>
+              </li>
+              <li class="nav-item mx-0 mx-lg-1" v-if="token === null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="#login">Login</a>
+              </li>
+              <li class="nav-item mx-0 mx-lg-1" v-if="token === null">
+                <a class="nav-link py-3 px-0 px-lg-3 rounded js-scroll-trigger" href="#register">Sign Up</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Header -->
+      <header class="masthead bg-primary text-white text-center">
+        <div class="container">
+          <h1 class="text-uppercase mb-0">ToDo App</h1>
+          <hr class="star-light">
+          <img class="img-fluid mb-5 d-block mx-auto" src="img/catdog.jpg" alt="" v-if="token === null">
+          <h2 class="font-weight-light mb-0" v-if="first_name === null || last_name === null">App for your task management</h2>
+          <h2 class="font-weight-light mb-0" v-if="first_name !== null && last_name !== null">Hello {{ first_name }}{{ last_name }}! This is your ToDo App!</h2>
+        </div>
+      </header>
+
+      <!-- Task List Section -->
+      <section id="tasks" v-if="token !== null">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Tasks</h2>
+          <hr class="star-dark mb-5">
+          <table class="table">
+           <thead>
+             <tr>
+               <th>Tasks</th>
+               <th>Priority</th>
+               <th>Status</th>
+               <th>Tweet</th>
+               <th>Delete</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr v-for="todo in todos">
+               <td>{{todo.task}}</td>
+               <td>{{todo.priority}}</td>
+               <td v-if="todo.done === 'false'"><button type="button" class="btn btn-danger" v-on:click="notToDone(todo._id)">Not Done</button></td>
+               <td v-if="todo.done === 'true'"><button type="button" class="btn btn-primary" v-on:click="doneToNot(todo._id)">Done</button></td>
+               <td><button type="button" class="btn btn-info" v-on:click="tweetTask(todo)">Tweet</button></td>
+               <td><button type="button" class="btn btn-danger" v-on:click="deleteTask(todo._id)">X</button></td>
+             </tr>
+           </tbody>
+         </table>
+        </div>
+      </section>
+
+      <!-- Add Task Section -->
+      <section id="add-task" v-if="token !== null">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Add New Task</h2>
+          <hr class="star-dark mb-5">
+          <form class="taskForm" id="task-form" novalidate="novalidate">
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                <label>Add New Task</label>
+                <input class="form-control" id="task-add" type="task" placeholder="Input Task Here" required="required" data-validation-required-message="Input your task" v-model="task">
+                <p class="help-block text-danger"></p>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                <label>Priority</label>
+                <select class="form-control" id="priority-add" type="priority" required="required" data-validation-required-message="Input your priority" v-model="priority">
+                  <option disabled value="">Select Priority</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+                <p class="help-block text-danger"></p>
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary btn-xl" id="addTaskButton" v-on:click="addTask">Add Task</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Login Section -->
+      <section id="login" v-if="token === null">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Login</h2>
+          <hr class="star-dark mb-5">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <!-- To configure the contact form email address, go to mail/contact_me.php and update the email address in the PHP file on line 19. -->
+              <!-- The form should work on most web servers, but if the form is not working you may need to configure your web server differently. -->
+              <div style="margin:0 auto;" class="fb-login-button" data-width="100" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" scope="public_profile,email" onlogin="checkLoginState();"></div>
+              <form name="loginForm" id="login-form" novalidate="novalidate">
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Email Address</label>
+                    <input class="form-control" id="email-login" type="email" placeholder="Email Address" required="required" data-validation-required-message="Please enter your email address." v-model="emailLogin">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Password</label>
+                    <input class="form-control" id="password-login" type="password" placeholder="Password" required="required" data-validation-required-message="Please enter your password." v-model="passwordLogin">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <br>
+                <div id="success"></div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-xl" id="loginButton" v-on:click="login">Login</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Register Section -->
+      <section id="register" v-if="token === null">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Register</h2>
+          <hr class="star-dark mb-5">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <!-- To configure the contact form email address, go to mail/contact_me.php and update the email address in the PHP file on line 19. -->
+              <!-- The form should work on mconsole.log('already registered');ost web servers, but if the form is not working you may need to configure your web server differently. -->
+              <form name="registerForm" id="register-form" novalidate="novalidate">
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>First Name</label>
+                    <input class="form-control" id="fname" type="text" placeholder="First Name" required="required" data-validation-required-message="Please enter your first name." v-model="first_name">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Last Name</label>
+                    <input class="form-control" id="lname" type="tel" placeholder="Last Name" required="required" data-validation-required-message="Please enter your last name." v-model="last_name">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Email Address</label>
+                    <input class="form-control" id="email" type="email" placeholder="Email Address" required="required" data-validation-required-message="Please enter your email address." v-model="email">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Password</label>
+                    <input class="form-control" id="password" type="password" placeholder="Password" required="required" data-validation-required-message="Please enter your password." v-model="password">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <br>
+                <div id="success"></div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-xl" id="registerButton" v-on:click="signUp">Sign Up</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer text-center">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4 mb-5 mb-lg-0">
+              <h4 class="text-uppercase mb-4">Location</h4>
+              <p class="lead mb-0">221B Baker St,Marylebone
+                <br>London, NW1 6XE</p>
+            </div>
+            <div class="col-md-4 mb-5 mb-lg-0">
+              <h4 class="text-uppercase mb-4">Around the Web</h4>
+              <ul class="list-inline mb-0">
+                <li class="list-inline-item">
+                  <a class="btn btn-outline-light btn-social text-center rounded-circle" href="#">
+                    <i class="fa fa-fw fa-facebook"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a class="btn btn-outline-light btn-social text-center rounded-circle" href="#">
+                    <i class="fa fa-fw fa-google-plus"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a class="btn btn-outline-light btn-social text-center rounded-circle" href="#">
+                    <i class="fa fa-fw fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a class="btn btn-outline-light btn-social text-center rounded-circle" href="#">
+                    <i class="fa fa-fw fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item">
+                  <a class="btn btn-outline-light btn-social text-center rounded-circle" href="#">
+                    <i class="fa fa-fw fa-dribbble"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <h4 class="text-uppercase mb-4">About</h4>
+              <p class="lead mb-0">A simple ToDo App!</p>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+      <div class="copyright py-4 text-center text-white">
+        <div class="container">
+          <small>ToDoAppMaram &copy; 2018</small>
+          <p><small>(copyright pending)</small></p>
+        </div>
+      </div>
+
+      <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+      <div class="scroll-to-top d-lg-none position-fixed ">
+        <a class="js-scroll-trigger d-block text-center text-white rounded" href="#page-top">
+          <i class="fa fa-chevron-up"></i>
+        </a>
+      </div>
+
+      <!-- Portfolio Modals -->
+
+      <!-- Portfolio Modal 1 -->
+      <div class="portfolio-modal mfp-hide" id="portfolio-modal-1">
+        <div class="portfolio-modal-dialog bg-white">
+          <a class="close-button d-none d-md-block portfolio-modal-dismiss" href="#">
+            <i class="fa fa-3x fa-times"></i>
+          </a>
+          <div class="container text-center">
+            <div class="row">
+              <div class="col-lg-8 mx-auto">
+                <h2 class="text-secondary text-uppercase mb-0">Project Name</h2>
+                <hr class="star-dark mb-5">
+                <img class="img-fluid mb-5" src="img/portfolio/cabin.png" alt="">
+                <p class="mb-5">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam, recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur itaque. Nam.</p>
+                <a class="btn btn-primary btn-lg rounded-pill portfolio-modal-dismiss" href="#">
+                  <i class="fa fa-close"></i>doneToNot
+                  Close Project</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Plugin JavaScript -->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+    <!-- Contact Form JavaScript -->
+    <script src="js/jqBootstrapValidation.js"></script>
+    <script src="js/contact_me.js"></script>
+    <!-- Custom scripts for this template -->
+    <script src="js/freelancer.min.js"></script>
+    <script>
+      var app = new Vue({
+        el: '#app',
+        data: {
+          userId: localStorage.getItem('id'),
+          first_name: localStorage.getItem('first_name'),
+          last_name: localStorage.getItem('last_name'),
+          email: null,
+          password: null,
+          token: localStorage.getItem('authorization'),
+          emailLogin: null,
+          passwordLogin: null,
+          task: null,
+          priority: null,
+          todos: null
+        },
+        methods: {
+          signUp: function(){
+            event.preventDefault()
+
+            axios.post('http://todoserver.lockonmaram.com/signup', {
+              first_name: this.first_name,
+              last_name: this.last_name,
+              email: this.email,
+              password: this.password
+            })
+            .then(res=>{
+              // console.log(res.data);
+              this.token = res.data
+              // console.log(this.token);
+              localStorage.setItem('authorization', res.data.token);
+              localStorage.setItem('id', res.data.userId);
+              localStorage.setItem('first_name', res.data.first_name);
+              localStorage.setItem('last_name', res.data.last_name);
+              swal("Yeay", "You are logged in!", "success");
+            })
+          },
+          login: function(){
+            event.preventDefault()
+
+            axios.post('http://todoserver.lockonmaram.com/login', {
+              email: this.emailLogin,
+              password: this.passwordLogin
+            })
+            .then(res=>{
+              console.log('resasdfadsf',res);
+              this.token = res.data.token
+              this.userId = res.data.userId
+              this.first_name = res.data.first_name
+              this.last_name = res.data.last_name
+              // console.log(this.userId);
+              // console.log(this.token);
+              localStorage.setItem('authorization', res.data.token);
+              localStorage.setItem('id', res.data.userId);
+              localStorage.setItem('first_name', res.data.first_name);
+              localStorage.setItem('last_name', res.data.last_name);
+              swal("Yeay", "You are logged in!", "success");
+            })
+          },
+          logout: function(){
+            // event.preventDefault()
+            this.token = null
+            this.userId = null
+            this.first_name = null
+            this.last_name = null
+            localStorage.clear();
+            swal("You have logged out", "See you later!");
+          },
+          getTask: function(){
+            // event.preventDefault()
+            axios.post('http://todoserver.lockonmaram.com/todos',{
+              userId: this.userId
+            })
+            .then(todos=>{
+              this.todos = todos.data
+            })
+          },
+          addTask: function(){
+            // event.preventDefault()
+
+            axios.post('http://todoserver.lockonmaram.com/todos/add',{
+              task: this.task,
+              priority: this.priority,
+              userId: this.userId
+            })
+            .then(task=>{
+              swal("Yeay", "You have added a task!", "success");
+              window.location.assign('http://todo.lockonmaram.com')
+            })
+          },
+          notToDone: function(todoId){
+            event.preventDefault()
+            axios.put('http://todoserver.lockonmaram.com/todos/updateDone',{
+              todoId: todoId
+            })
+            .then(done=>{
+              window.location.assign('http://todo.lockonmaram.com')
+            })
+          },
+          doneToNot: function(todoId){
+            event.preventDefault()
+            axios.put('http://todoserver.lockonmaram.com/todos/updateNot',{
+              todoId: todoId
+            })
+            .then(not=>{
+              window.location.assign('http://todo.lockonmaram.com')
+            })
+          },
+          deleteTask: function(todoId){
+            // event.preventDefault()
+            swal({
+              title: "Are you sure?",
+              text: "Once deleted, you will not be able to recover this task!",
+              icon: "warning",
+              buttons: true,
+              dangerMode: true,
+            })
+            .then((willDelete) => {
+              if (willDelete) {
+                axios.delete('http://todoserver.lockonmaram.com/todos/delete',{data:{
+                  todoId: todoId
+                }})
+                .then(result=>{
+                  // console.log('----res',result);
+                  swal("Poof! Your imaginary file has been deleted!", {
+                    icon: "success",
+                  });
+                  window.location.assign('http://todo.lockonmaram.com')
+                })
+              } else {
+                swal("Your task is safe!");
+              }
+            });
+          },
+          tweetTask: function(todo){
+            axios.post('http://todoserver.lockonmaram.com/api/tweet',{
+              todo: todo
+            })
+            .then(result=>{
+              window.open('https://twitter.com/')
+              swal("Yeay", "You have tweeted your task!", "success");
+            })
+          }
+        },
+        created(){
+          this.getTask()
+        },
+      })
+    </script>
+  </body>
+
+</html>
