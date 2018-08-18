@@ -17,7 +17,7 @@ var app = new Vue({
           signUp: function(){
             event.preventDefault()
 
-            axios.post('http://localhost:3000/signup', {
+            axios.post('https://todonotsofancyserver.lockonmaram.com/signup', {
               first_name: this.first_name,
               last_name: this.last_name,
               email: this.email,
@@ -30,14 +30,14 @@ var app = new Vue({
               localStorage.clear();
               swal("You are registered!", "Please login :)", "success")
               .then(result=>{
-                window.location.assign('http:///localhost:8080/#login')
+                window.location.assign('https://todonotsofancy.lockonmaram.com/#login')
               })
             })
           },
           login: function(){
             event.preventDefault()
 
-            axios.post('http://localhost:3000/login', {
+            axios.post('https://todonotsofancyserver.lockonmaram.com/login', {
               email: this.emailLogin,
               password: this.passwordLogin
             })
@@ -56,7 +56,7 @@ var app = new Vue({
               localStorage.setItem('last_name', res.data.last_name);
               swal("Yeay", "You are logged in!", "success")
               .then(result=>{
-                window.location.assign('http:///localhost:8080')
+                window.location.reload()
               })
             })
           },
@@ -72,7 +72,7 @@ var app = new Vue({
           },
           getTask: function(){
             // event.preventDefault()
-            axios.get(`http://localhost:3000/todos/${this.userId}`)
+            axios.get(`https://todonotsofancyserver.lockonmaram.com/todos/${this.userId}`)
             .then(todos=>{
               this.todos = todos.data
             })
@@ -80,7 +80,7 @@ var app = new Vue({
           addTask: function(){
             event.preventDefault()
 
-            axios.post(`http://localhost:3000/todos/${this.userId}/add`,{
+            axios.post(`https://todonotsofancyserver.lockonmaram.com/todos/${this.userId}/add`,{
               task: this.task,
               priority: this.priority
             })
@@ -94,7 +94,7 @@ var app = new Vue({
           },
           notToDone: function(todoId){
             event.preventDefault()
-            axios.put('http://localhost:3000/todos/updateDone',{
+            axios.put('https://todonotsofancyserver.lockonmaram.com/todos/updateDone',{
               todoId: todoId
             })
             .then(done=>{
@@ -103,7 +103,7 @@ var app = new Vue({
           },
           doneToNot: function(todoId){
             event.preventDefault()
-            axios.put('http://localhost:3000/todos/updateNot',{
+            axios.put('https://todonotsofancyserver.lockonmaram.com/todos/updateNot',{
               todoId: todoId
             })
             .then(not=>{
@@ -121,7 +121,7 @@ var app = new Vue({
             })
             .then((willDelete) => {
               if (willDelete) {
-                axios.delete('http://localhost:3000/todos/delete',{data:{
+                axios.delete('https://todonotsofancyserver.lockonmaram.com/todos/delete',{data:{
                   todoId: todoId
                 }})
                 .then(result=>{

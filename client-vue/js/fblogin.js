@@ -8,7 +8,7 @@ function statusChangeCallback(response) {
   // for FB.getLoginStatus().
   if (response.status === 'connected') {
     // Logged into your app and Facebook.
-    axios.post('http://localhost:3000/fblogin',{},{
+    axios.post('https://todonotsofancyserver.lockonmaram.com/fblogin',{},{
       headers:{
         token: response.authResponse.accessToken
       }
@@ -22,7 +22,7 @@ function statusChangeCallback(response) {
       localStorage.setItem('last_name', res.data.data.last_name);
       swal("Yeay", "You are logged in!", "success")
       .then(result=>{
-        window.location.assign('http:///localhost:8080')
+        window.location.assign('https://todonotsofancy.lockonmaram.com')
       })
     })
     .catch(err=>{
