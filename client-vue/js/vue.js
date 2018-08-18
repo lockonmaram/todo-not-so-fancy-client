@@ -11,7 +11,6 @@ var app = new Vue({
           passwordLogin: null,
           task: null,
           priority: 'low',
-          newPrior: null,
           todos: null
         },
         methods: {
@@ -43,7 +42,7 @@ var app = new Vue({
               password: this.passwordLogin
             })
             .then(res=>{
-              console.log('resasdfadsf',res);
+              // console.log('resasdfadsf',res);
               this.token = res.data.token
               this.userId = res.data.userId
               this.first_name = res.data.first_name
@@ -86,7 +85,7 @@ var app = new Vue({
               priority: this.priority
             })
             .then(task=>{
-              console.log(task);
+              // console.log(task);
               swal("Yeay", "You have added a task!", "success")
               .then(result=>{
                 window.location.reload()
@@ -108,16 +107,6 @@ var app = new Vue({
               todoId: todoId
             })
             .then(not=>{
-              window.location.reload()
-            })
-          },
-          updatePrior: function(todoId){
-            event.preventDefault()
-            axios.put('http://localhost:3000/todos/updateNot',{
-              todoId: todoId,
-              priority: this.newPrior
-            })
-            .then(result=>{
               window.location.reload()
             })
           },
