@@ -30,7 +30,8 @@
     <v-toolbar-title>ToDoAPP</v-toolbar-title>
     <v-flex offset-xs9 align-end>
       <div>
-        <v-btn flat color="primary" @click="fbLogin">Login</v-btn>
+        <v-btn v-if="isLoggedIn === false" flat color="primary" @click="fbLogin">Login</v-btn>
+        <v-btn v-else-if="isLoggedIn !== false" flat color="primary" @click="logout">Logout</v-btn>
       </div>
     </v-flex>
   </v-toolbar>
@@ -38,7 +39,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 export default {
   name: 'NavBar',
@@ -50,8 +51,14 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fbLogin'
+      'fbLogin',
+      'logout'
     ])
-  }
+  },
+  computed: {
+    ...mapState([
+      'isLoggedIn'
+    ])
+  },
 }
 </script>
