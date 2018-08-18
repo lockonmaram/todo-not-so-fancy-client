@@ -29,6 +29,93 @@
   </head>
 
   <body id="page-top">
+    <script>
+      // This is called with the results from from FB.getLoginStatus().
+      function statusChangeCallback() {
+        console.log('statusChangeCallback');
+        console.log(response);
+        // The response object is returned with a status field that lets the
+        // app know the current login status of the person.
+        // Full docs on the response object can be found in the documentation
+        // for FB.getLoginStatus().
+        if (response.status === 'connected') {
+          // Logged into your app and Facebook.
+          // console.log('connecteueu',response.authResponse.accessToken);
+          axios.post('https://todoserver.lockonmaram.com/fblogin',{
+            token: response.authResponse.accessToken
+          })
+          .then(res=>{
+            console.log('res---->',res.data);
+            localStorage.setItem('authorization', res.data.token);
+            localStorage.setItem('id', res.data.userId);
+            localStorage.setItem('first_name', res.data.first_name);
+            localStorage.setItem('last_name', res.data.last_name);
+            window.location.assign('https://todo.lockonmaram.com')
+          })
+          .catch(err=>{
+            console.log(err);
+          })
+          // testAPI();
+        }
+      }
+
+      // This function is called when someone finishes with the Login
+      // Button.  See the onlogin handler attached to it in the sample
+      // code below.
+      // function checkLoginState() {
+      //   FB.getLoginStatus(function(response) {
+      //     statusChangeCallback(response);
+      //   });
+      // }
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '234985347350505',
+          cookie     : true,  // enable cookies to allow the server to access
+          // the session
+          xfbml      : true,  // parse social plugins on this page
+          version    : 'v2.8' // use graph api version 2.8
+        });
+
+        // Now that we've initialized the JavaScript SDK, we call
+        // FB.getLoginStatus().  This function gets the state of the
+        // person visiting this page and can return one of three states to
+        // the callback you provide.  They can be:
+        //
+        // 1. Logged into your app ('connected')
+        // 2. Logged into Facebook, but not your app ('not_authorized')
+        // 3. Not logged into Facebook and can't tell if they are logged into
+        //    your app or not.
+        //
+        // These three cases are handled in the callback function.
+
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+
+      };
+
+      // Load the SDK asynchronously
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+      // Here we run a very simple test of the Graph API after login is
+      // successful.  See statusChangeCallback() for when this call is made.
+      function testAPI() {
+        console.log('Welcome!  Fetching your information.... ');
+        FB.api('/me', function(response) {
+          // console.log(response);
+          // console.log('Successful login for: ' + response.name);
+          // document.getElementById('status').innerHTML =
+          // 'Thanks for logging in, ' + response.name + '!';
+        });
+      }
+    </script>
     <div id="app">
       <!-- Navigation -->
       <a class="menu-toggle rounded" href="#">
@@ -177,27 +264,26 @@
             <tbody>
               <tr v-for="todo in todos">
                 <td>{{todo.task}}</td>
-                <td>
-                  <select class="form-control" id="priority-add" v-if="todo.priority == 'low'" v-on:change="updatePrior(todo.id, value)">
+                <td>{{ todo.priority }}
+                  <!-- <select class="form-control" id="priority-add" v-if="todo.priority == 'low'" v-model="newPrior" v-on:change="updatePrior(todo.id)">
                     <option value="low" selected>Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
                   </select>
-                  <select class="form-control" id="priority-add" v-if="todo.priority == 'medium'" v-on:change="updatePrior(todo.id, value)">
+                  <select class="form-control" id="priority-add" v-if="todo.priority == 'medium'" v-model="newPrior" v-on:change="updatePrior(todo.id)">
                     <option value="low">Low</option>
                     <option value="medium" selected>Medium</option>
                     <option value="high">High</option>
                   </select>
-                  <select class="form-control" id="priority-add" v-if="todo.priority == 'high'" v-on:change="updatePrior(todo.id, value)">
+                  <select class="form-control" id="priority-add" v-if="todo.priority == 'high'" v-model="newPrior" v-on:change="updatePrior(todo.id)">
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high" selected>High</option>
-                  </select>
+                  </select> -->
                 </td>
                 <td v-if="todo.done === 'false'"><button type="button" class="btn btn-danger" v-on:click="notToDone(todo._id)">Not Done</button></td>
                 <td v-if="todo.done === 'true'"><button type="button" class="btn btn-primary" v-on:click="doneToNot(todo._id)">Done</button></td>
-                <td v-if="todo.done === 'false'"><a href='https://twitter.com/intent/tweet?text=I%20will%20do%20a%20task%20'><i class="icon-social-twitter"></i></a></td>
-                <td v-if="todo.done === 'true'"><a href='https://twitter.com/intent/tweet?text=I%20have%20completed%20my%20task!'><i class="icon-social-twitter"></i></a></td>
+                <td><button type="button" class="btn btn-info" v-on:click="tweetTask(todo)">Tweet</button></td>
                 <td><button type="button" class="btn btn-danger" v-on:click="deleteTask(todo._id)">X</button></td>
               </tr>
             </tbody>
@@ -290,90 +376,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Callout -->
-      <!-- <section class="callout">
-      <div class="container text-center">
-        <h2 class="mx-auto mb-5">Welcome to
-        <em>your</em>
-        next website!</h2>
-        <a class="btn btn-primary btn-xl" href="https://startbootstrap.com/template-overviews/stylish-portfolio/">Download Now!</a>
-      </div>
-      </section> -->
-
-      <!-- Portfolio -->
-      <!-- <section class="content-section" id="portfolio">
-        <div class="container">
-        <div class="content-section-heading text-center">
-        <h3 class="text-secondary mb-0">Portfolio</h3>
-        <h2 class="mb-5">Recent Projects</h2>
-      </div>
-      <div class="row no-gutters">
-        <div class="col-lg-6">
-          <a class="portfolio-item" href="#">
-            <span class="caption">
-              <span class="caption-content">
-                <h2>Stationary</h2>
-                <p class="mb-0">A yellow pencil with envelopes on a clean, blue backdrop!</p>
-              </span>
-            </span>
-            <img class="img-fluid" src="img/portfolio-1.jpg" alt="">
-          </a>
-        </div>
-        <div class="col-lg-6">
-          <a class="portfolio-item" href="#">
-            <span class="caption">
-              <span class="caption-content">
-                <h2>Ice Cream</h2>
-                <p class="mb-0">A dark blue background with a colored pencil, a clip, and a tiny ice cream cone!</p>
-              </span>
-            </span>
-            <img class="img-fluid" src="img/portfolio-2.jpg" alt="">
-          </a>
-        </div>
-        <div class="col-lg-6">
-          <a class="portfolio-item" href="#">
-            <span class="caption">
-              <span class="caption-content">
-                <h2>Strawberries</h2>
-                <p class="mb-0">Strawberries are such a tasty snack, especially with a little sugar on top!</p>
-              </span>
-            </span>
-            <img class="img-fluid" src="img/portfolio-3.jpg" alt="">
-          </a>
-        </div>
-        <div class="col-lg-6">
-          <a class="portfolio-item" href="#">
-            <span class="caption">
-              <span class="caption-content">
-                <h2>Workspace</h2>
-                <p class="mb-0">A yellow workspace with some scissors, pencils, and other objects.</p>
-              </span>
-            </span>
-            <img class="img-fluid" src="img/portfolio-4.jpg" alt="">
-          </a>
-        </div>
-      </div>
-      </div>
-      </section> -->
-
-      <!-- Call to Action -->
-      <!-- <section class="content-section bg-primary text-white">
-        <div class="container text-center">
-          <h2 class="mb-4">The buttons below are impossible to resist...</h2>
-          <a href="#" class="btn btn-xl btn-light mr-4">Click Me!</a>
-          <a href="#" class="btn btn-xl btn-dark">Look at Me!</a>
-        </div>
-      </section> -->
-
-      <!-- Map -->
-      <!-- <section id="contact" class="map">
-        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A&amp;output=embed"></iframe>
-        <br/>
-        <small>
-          <a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A"></a>
-        </small>
-      </section> -->
 
       <!-- Footer -->
       <footer class="footer text-center">

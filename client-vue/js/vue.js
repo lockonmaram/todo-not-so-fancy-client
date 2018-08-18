@@ -11,6 +11,7 @@ var app = new Vue({
           passwordLogin: null,
           task: null,
           priority: 'low',
+          newPrior: null,
           todos: null
         },
         methods: {
@@ -66,6 +67,7 @@ var app = new Vue({
             this.userId = null
             this.first_name = null
             this.last_name = null
+            this.todos = null
             localStorage.clear();
             swal("You have logged out", "See you later!");
           },
@@ -87,7 +89,7 @@ var app = new Vue({
               console.log(task);
               swal("Yeay", "You have added a task!", "success")
               .then(result=>{
-                window.location.href='http://localhost:8080/#task'
+                window.location.reload()
               })
             })
           },
@@ -109,11 +111,11 @@ var app = new Vue({
               window.location.reload()
             })
           },
-          updatePrior: function(todoId, prior){
+          updatePrior: function(todoId){
             event.preventDefault()
             axios.put('http://localhost:3000/todos/updateNot',{
               todoId: todoId,
-              priority: prior
+              priority: this.newPrior
             })
             .then(result=>{
               window.location.reload()
@@ -148,13 +150,21 @@ var app = new Vue({
             });
           },
           tweetTask: function(todo){
-            axios.post('http://localhost:3000/api/tweet',{
-              todo: todo
-            })
-            .then(result=>{
-              window.open('https://twitter.com/')
-              swal("Yeay", "You have tweeted your task!", "success");
-            })
+            let message
+            let prior
+            if (todo.priority === 'low') {
+              prior = 'someday'
+            }else if (todo.priority === 'medium') {
+              prior = 'in a minute'
+            }else if (todo.priority === 'high') {
+              prior = 'as soon as possible'
+            }
+            if (todo.done === 'false') {
+              message = `I%20will%20do%20a%20task:%20${todo.task},%20${prior}`
+            }else if (todo.done === 'true') {
+              message = `I%20have%20done%20the%20task:%20${todo.task}`
+            }
+            window.open(`https://twitter.com/intent/tweet?text=${message}&hashtags=ToDoApp`)
           }
         },
         created(){
