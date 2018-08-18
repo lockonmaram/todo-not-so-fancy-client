@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>ToDoApp</title>
+    <link rel="icon" href="./img/task.ico" type="image/x-icon">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/stylish-portfolio.min.css" rel="stylesheet">
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  </head>
+
+  <body id="page-top">
+    <div id="app">
+      <!-- Navigation -->
+      <a class="menu-toggle rounded" href="#">
+        <i class="fas fa-bars"></i>
+      </a>
+      <nav id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+          <li class="sidebar-brand">
+            <a class="js-scroll-trigger" href="#page-top">ToDoApp</a>
+          </li>
+          <li class="sidebar-nav-item" v-if="!token">
+            <a class="js-scroll-trigger" href="#page-top">Home</a>
+          </li>
+          <li class="sidebar-nav-item" v-if="token">
+            <a class="js-scroll-trigger" href="#page-top">{{ first_name }}</a>
+          </li>
+          <li class="sidebar-nav-item" v-if="!token">
+            <a class="js-scroll-trigger" href="#login">Login</a>
+          </li>
+          <li class="sidebar-nav-item" v-if="!token">
+            <a class="js-scroll-trigger" href="#signup">Register</a>
+          </li>
+          <li class="sidebar-nav-item" v-if="token">
+            <a class="js-scroll-trigger" href="#task">Task</a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a class="js-scroll-trigger" href="#services">Help</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Header -->
+      <header class="masthead d-flex">
+        <div class="container text-center my-auto">
+          <h1 class="mb-1">ToDo App</h1>
+          <h3 class="mb-5">
+            <em>A Simple Task Management App!</em>
+            <br>
+            <em v-if="token">Welcome {{first_name}}!</em>
+          </h3>
+          <a class="btn btn-primary btn-xl js-scroll-trigger" v-if="!token" href="#login">Login</a>
+          <a class="btn btn-primary btn-xl js-scroll-trigger" v-else v-on:click="logout()">Logout</a>
+        </div>
+        <div class="overlay"></div>
+      </header>
+
+      <!-- Login -->
+      <section class="content-section bg-light" v-if="!token" id="login">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Login</h2>
+          <hr class="star-dark mb-5">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <!-- To configure the contact form email address, go to mail/contact_me.php and update the email address in the PHP file on line 19. -->
+              <!-- The form should work on most web servers, but if the form is not working you may need to configure your web server differently. -->
+              <div style="margin:0 auto;" class="fb-login-button" data-width="100" data-max-rows="1" data-size="large" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="false" scope="public_profile,email" onlogin="statusChangeCallback();"></div>
+              <form name="loginForm" id="login-form" novalidate="novalidate">
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Email Address</label>
+                    <input class="form-control" id="email-login" type="email" placeholder="Email Address" required="required" data-validation-required-message="Please enter your email address." v-model="emailLogin">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Password</label>
+                    <input class="form-control" id="password-login" type="password" placeholder="Password" required="required" data-validation-required-message="Please enter your password." v-model="passwordLogin">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <br>
+                <div id="success"></div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-xl" id="loginButton" v-on:click="login">Login</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Register -->
+      <section class="content-section bg-light" v-if="!token" id="signup">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Register</h2>
+          <hr class="star-dark mb-5">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <!-- To configure the contact form email address, go to mail/contact_me.php and update the email address in the PHP file on line 19. -->
+              <!-- The form should work on mconsole.log('already registered');ost web servers, but if the form is not working you may need to configure your web server differently. -->
+              <form name="registerForm" id="register-form" novalidate="novalidate">
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>First Name</label>
+                    <input class="form-control" id="fname" type="text" placeholder="First Name" required="required" data-validation-required-message="Please enter your first name." v-model="first_name">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Last Name</label>
+                    <input class="form-control" id="lname" type="tel" placeholder="Last Name" required="required" data-validation-required-message="Please enter your last name." v-model="last_name">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Email Address</label>
+                    <input class="form-control" id="email" type="email" placeholder="Email Address" required="required" data-validation-required-message="Please enter your email address." v-model="email">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                    <label>Password</label>
+                    <input class="form-control" id="password" type="password" placeholder="Password" required="required" data-validation-required-message="Please enter your password." v-model="password">
+                    <p class="help-block text-danger"></p>
+                  </div>
+                </div>
+                <br>
+                <div id="success"></div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-xl" id="registerButton" v-on:click="signUp">Sign Up</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Task -->
+      <section class="content-section bg-light" v-if="token" id="task">
+        <div style="overflow-x:auto;" class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Tasks</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tasks</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Tweet</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="todo in todos">
+                <td>{{todo.task}}</td>
+                <td>
+                  <select class="form-control" id="priority-add" v-if="todo.priority == 'low'" v-on:change="updatePrior(todo.id, value)">
+                    <option value="low" selected>Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                  <select class="form-control" id="priority-add" v-if="todo.priority == 'medium'" v-on:change="updatePrior(todo.id, value)">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                  <select class="form-control" id="priority-add" v-if="todo.priority == 'high'" v-on:change="updatePrior(todo.id, value)">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high" selected>High</option>
+                  </select>
+                </td>
+                <td v-if="todo.done === 'false'"><button type="button" class="btn btn-danger" v-on:click="notToDone(todo._id)">Not Done</button></td>
+                <td v-if="todo.done === 'true'"><button type="button" class="btn btn-primary" v-on:click="doneToNot(todo._id)">Done</button></td>
+                <td v-if="todo.done === 'false'"><a href='https://twitter.com/intent/tweet?text=I%20will%20do%20a%20task%20'><i class="icon-social-twitter"></i></a></td>
+                <td v-if="todo.done === 'true'"><a href='https://twitter.com/intent/tweet?text=I%20have%20completed%20my%20task!'><i class="icon-social-twitter"></i></a></td>
+                <td><button type="button" class="btn btn-danger" v-on:click="deleteTask(todo._id)">X</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Add Task -->
+      <section class="content-section bg-light" v-if="token" id="add">
+        <div class="container">
+          <h2 class="text-center text-uppercase text-secondary mb-0">Add New Task</h2>
+          <hr class="star-dark mb-5">
+          <form class="taskForm" id="task-form" novalidate="novalidate">
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                <label>Add New Task</label>
+                <input class="form-control" id="task-add" type="task" placeholder="Input Task Here" required="required" data-validation-required-message="Input your task" v-model="task">
+                <p class="help-block text-danger"></p>
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="form-group floating-label-form-group controls mb-0 pb-2" v-model="priority">
+                <label>Priority</label>
+                <select class="form-control" id="priority-add" required="required" data-validation-required-message="Input your priority" v-model="priority">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary btn-xl" id="addTaskButton" v-on:click="addTask">Add Task</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Services -->
+      <section class="content-section bg-primary text-white text-center" id="services">
+        <div class="container">
+          <div class="content-section-heading">
+            <h3 class="text-secondary mb-0">Services</h3>
+            <h2 class="mb-5">What You Can Do</h2>
+          </div>
+          <div class="row">
+            <div class="col-lg-3 col-md-6 mb-5 mb-lg-0">
+              <a class="js-scroll-trigger" href="#login">
+                <span class="service-icon rounded-circle mx-auto mb-3">
+                  <i class="icon-user"></i>
+                </span>
+              </a>
+              <h4>
+                <strong>Login</strong>
+              </h4>
+              <p class="text-faded mb-0">Start by logging in / register your account!</p>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5 mb-lg-0">
+              <a class="js-scroll-trigger" href="#task">
+                <span class="service-icon rounded-circle mx-auto mb-3">
+                  <i class="icon-list"></i>
+                </span>
+              </a>
+              <h4>
+                <strong>Todo</strong>
+              </h4>
+              <p class="text-faded mb-0">Input your task!</p>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-5 mb-md-0">
+              <a class="js-scroll-trigger" href="#task">
+                <span class="service-icon rounded-circle mx-auto mb-3">
+                  <i class="icon-check"></i>
+                </span>
+              </a>
+              <h4>
+                <strong>Achieve</strong>
+              </h4>
+              <p class="text-faded mb-0">Complete your task!</p>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <a class="js-scroll-trigger" href="#task">
+                <span class="service-icon rounded-circle mx-auto mb-3">
+                  <i class="icon-social-twitter"></i>
+                </span>
+              </a>
+              <h4>
+                <strong>Tweet</strong>
+              </h4>
+              <p class="text-faded mb-0">Brag about your achievement!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Callout -->
+      <!-- <section class="callout">
+      <div class="container text-center">
+        <h2 class="mx-auto mb-5">Welcome to
+        <em>your</em>
+        next website!</h2>
+        <a class="btn btn-primary btn-xl" href="https://startbootstrap.com/template-overviews/stylish-portfolio/">Download Now!</a>
+      </div>
+      </section> -->
+
+      <!-- Portfolio -->
+      <!-- <section class="content-section" id="portfolio">
+        <div class="container">
+        <div class="content-section-heading text-center">
+        <h3 class="text-secondary mb-0">Portfolio</h3>
+        <h2 class="mb-5">Recent Projects</h2>
+      </div>
+      <div class="row no-gutters">
+        <div class="col-lg-6">
+          <a class="portfolio-item" href="#">
+            <span class="caption">
+              <span class="caption-content">
+                <h2>Stationary</h2>
+                <p class="mb-0">A yellow pencil with envelopes on a clean, blue backdrop!</p>
+              </span>
+            </span>
+            <img class="img-fluid" src="img/portfolio-1.jpg" alt="">
+          </a>
+        </div>
+        <div class="col-lg-6">
+          <a class="portfolio-item" href="#">
+            <span class="caption">
+              <span class="caption-content">
+                <h2>Ice Cream</h2>
+                <p class="mb-0">A dark blue background with a colored pencil, a clip, and a tiny ice cream cone!</p>
+              </span>
+            </span>
+            <img class="img-fluid" src="img/portfolio-2.jpg" alt="">
+          </a>
+        </div>
+        <div class="col-lg-6">
+          <a class="portfolio-item" href="#">
+            <span class="caption">
+              <span class="caption-content">
+                <h2>Strawberries</h2>
+                <p class="mb-0">Strawberries are such a tasty snack, especially with a little sugar on top!</p>
+              </span>
+            </span>
+            <img class="img-fluid" src="img/portfolio-3.jpg" alt="">
+          </a>
+        </div>
+        <div class="col-lg-6">
+          <a class="portfolio-item" href="#">
+            <span class="caption">
+              <span class="caption-content">
+                <h2>Workspace</h2>
+                <p class="mb-0">A yellow workspace with some scissors, pencils, and other objects.</p>
+              </span>
+            </span>
+            <img class="img-fluid" src="img/portfolio-4.jpg" alt="">
+          </a>
+        </div>
+      </div>
+      </div>
+      </section> -->
+
+      <!-- Call to Action -->
+      <!-- <section class="content-section bg-primary text-white">
+        <div class="container text-center">
+          <h2 class="mb-4">The buttons below are impossible to resist...</h2>
+          <a href="#" class="btn btn-xl btn-light mr-4">Click Me!</a>
+          <a href="#" class="btn btn-xl btn-dark">Look at Me!</a>
+        </div>
+      </section> -->
+
+      <!-- Map -->
+      <!-- <section id="contact" class="map">
+        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A&amp;output=embed"></iframe>
+        <br/>
+        <small>
+          <a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;aq=0&amp;oq=twitter&amp;sll=28.659344,-81.187888&amp;sspn=0.128789,0.264187&amp;ie=UTF8&amp;hq=Twitter,+Inc.,+Market+Street,+San+Francisco,+CA&amp;t=m&amp;z=15&amp;iwloc=A"></a>
+        </small>
+      </section> -->
+
+      <!-- Footer -->
+      <footer class="footer text-center">
+        <div class="container">
+          <ul class="list-inline mb-5">
+            <li class="list-inline-item">
+              <a class="social-link rounded-circle text-white mr-3" href="#">
+                <i class="icon-social-facebook"></i>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a class="social-link rounded-circle text-white mr-3" href="https://twitter.com/stratosmaram">
+                <i class="icon-social-twitter"></i>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a class="social-link rounded-circle text-white" href="http://www.github.com/lockonmaram">
+                <i class="icon-social-github"></i>
+              </a>
+            </li>
+          </ul>
+          <p class="text-muted small mb-0">Copyright &copy; ToDoApp 2018</p>
+          <p class="text-muted small mb-0">(Copyright pending)</p>
+        </div>
+      </footer>
+
+      <!-- Scroll to Top Button-->
+      <a class="scroll-to-top rounded js-scroll-trigger" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+      </a>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src="js/vue.js"></script>
+    <script src="js/stylish-portfolio.min.js"></script>
+
+  </body>
+
+</html>
