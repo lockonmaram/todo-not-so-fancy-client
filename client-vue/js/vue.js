@@ -5,8 +5,6 @@ var app = new Vue({
           first_name: localStorage.getItem('first_name'),
           last_name: localStorage.getItem('last_name'),
           token: localStorage.getItem('authorization'),
-          email: null,
-          password: null,
           emailLogin: null,
           passwordLogin: null,
           task: null,
@@ -14,14 +12,14 @@ var app = new Vue({
           todos: null
         },
         methods: {
-          signUp: function(){
+          signUp: function(value){
             event.preventDefault()
-
+            console.log('ini value', value);
             axios.post('https://todonotsofancyserver.lockonmaram.com/signup', {
-              first_name: this.first_name,
-              last_name: this.last_name,
-              email: this.email,
-              password: this.password
+              first_name: value.first_name,
+              last_name: value.last_name,
+              email: value.email,
+              password: value.password
             })
             .then(res=>{
               // console.log(res.data);
@@ -34,12 +32,12 @@ var app = new Vue({
               })
             })
           },
-          login: function(){
+          login: function(value){
             event.preventDefault()
 
             axios.post('https://todonotsofancyserver.lockonmaram.com/login', {
-              email: this.emailLogin,
-              password: this.passwordLogin
+              email: value.email,
+              password: value.password
             })
             .then(res=>{
               // console.log('resasdfadsf',res);
@@ -77,12 +75,12 @@ var app = new Vue({
               this.todos = todos.data
             })
           },
-          addTask: function(){
+          addTask: function(value){
             event.preventDefault()
 
             axios.post(`https://todonotsofancyserver.lockonmaram.com/todos/${this.userId}/add`,{
-              task: this.task,
-              priority: this.priority
+              task: value.task,
+              priority: value.priority
             })
             .then(task=>{
               // console.log(task);
@@ -92,25 +90,27 @@ var app = new Vue({
               })
             })
           },
-          notToDone: function(todoId){
+          notToDone: function(value){
+            console.log(value);
             event.preventDefault()
             axios.put('https://todonotsofancyserver.lockonmaram.com/todos/updateDone',{
-              todoId: todoId
+              todoId: value.todoId
             })
             .then(done=>{
               window.location.reload()
             })
           },
-          doneToNot: function(todoId){
+          doneToNot: function(value){
+            console.log(value);
             event.preventDefault()
             axios.put('https://todonotsofancyserver.lockonmaram.com/todos/updateNot',{
-              todoId: todoId
+              todoId: value.todoId
             })
             .then(not=>{
               window.location.reload()
             })
           },
-          deleteTask: function(todoId){
+          deleteTask: function(value){
             // event.preventDefault()
             swal({
               title: "Are you sure?",
@@ -122,7 +122,7 @@ var app = new Vue({
             .then((willDelete) => {
               if (willDelete) {
                 axios.delete('https://todonotsofancyserver.lockonmaram.com/todos/delete',{data:{
-                  todoId: todoId
+                  todoId: value.todoId
                 }})
                 .then(result=>{
                   // console.log('----res',result);
