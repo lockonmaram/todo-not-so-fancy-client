@@ -1,4 +1,4 @@
-Vue.component('AddTask',{
+Vue.component('Add',{
     template: `
     <section class="content-section bg-light" v-if="token" id="add">
       <div class="container">
